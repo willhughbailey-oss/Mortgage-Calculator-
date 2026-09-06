@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mortgage Freedom</title>
+  
+  <!-- Web App / Fullscreen Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mortgage Freedom">
+  <meta name="theme-color" content="#0f172a">
+  
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><path d='M25 50 L50 25 L75 50 V75 H60 V60 H40 V75 H25 Z' fill='%2310b981'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2310b981'/></svg>">
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #161f30;
+      --card-border: #243048;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.15);
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 20px);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 16px 4px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group.full {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 12px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      pointer-events: none;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      background: #0f1624;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+
+    .with-prefix input {
+      padding-left: 28px;
+    }
+
+    .with-suffix input {
+      padding-right: 32px;
+    }
+
+    /* Output Section */
+    .highlight-box {
+      background: linear-gradient(145deg, #13242b, #152c28);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 16px;
+      padding: 20px 18px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .highlight-box .tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+    }
+
+    .main-metric {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 8px 0 4px;
+      line-height: 1.2;
+    }
+
+    .sub-metric {
+      font-size: 0.85rem;
+      color: #a7f3d0;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(16, 185, 129, 0.2);
+      text-align: left;
+    }
+
+    .stat-item .label {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    .stat-item .val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-top: 2px;
+    }
+
+    /* Micro Section */
+    .micro-container {
+      background: rgba(16, 185, 129, 0.04);
+      border: 1px dashed var(--accent);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .micro-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .micro-result {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f8fafc;
+      line-height: 1.4;
+    }
+
+    .micro-result span {
+      color: var(--accent);
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      background: #0f1624;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .chip:hover, .chip:active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mortgage Freedom Tracker</h1>
+    <p>Santander Mortgage & Micro-Savings Engine</p>
+  </header>
+
+  <!-- Output Highlight -->
+  <section class="highlight-box">
+    <div class="tag">Time Knocked Off By Pay Off Fund</div>
+    <div class="main-metric" id="outTimeSaved">-</div>
+    <div class="sub-metric" id="outInterestSaved">Interest saved: £0.00</div>
+
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="label">Monthly Payment</div>
+        <div class="val" id="outPayment">£0.00</div>
+      </div>
+      <div class="stat-item">
+        <div class="label">New Remaining Term</div>
+        <div class="val" id="outNewTerm">-</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inputs: Mortgage Details -->
+  <section class="card">
+    <div class="card-title">Santander Mortgage Details</div>
+    <div class="input-grid">
+      <div class="input-group full">
+        <label for="balance">Current Balance</label>
+        <div class="input-wrapper with-prefix">
+          <span class="input-prefix">£</span>
+          <input type="number" id="balance" step="100" value="250000">
+        </div>
+      </div>
+
+      <div class="input-group full">
+        <label for="rate">Annual Interest Rate</label>
+        <div class="input-wrapper with-suffix">
+          <input type="number" id="rate" step="0.01" value="4.50">
+          <span class="input-suffix">%</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="termYears">Remaining Years</label>
+        <div class="input-wrapper with-suffix">
+          <input type="number" id="termYears" min="0" max="45" value="20">
+          <span class="input-suffix">yrs</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="termMonths">Remaining Months</label>
+        <div class="input-wrapper with-suffix">
+          <input type="number" id="termMonths" min="0" max="11" value="0">
+          <span class="input-suffix">mo</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inputs: Pay Off Fund -->
+  <section class="card">
+    <div class="card-title">Mortgage Offset / Pay Off Fund</div>
+    <div class="input-group">
+      <label for="payoffFund">Current Pay Off Fund Balance</label>
+      <div class="input-wrapper with-prefix">
+        <span class="input-prefix">£</span>
+        <input type="number" id="payoffFund" step="50" value="15000">
+      </div>
+    </div>
+  </section>
+
+  <!-- Micro-Savings Test -->
+  <section class="card">
+    <div class="card-title">Micro-Savings Power</div>
+    <div class="micro-container">
+      <div class="micro-row">
+        <label for="microAmount" style="white-space: nowrap;">If I save:</label>
+        <div class="input-wrapper with-prefix" style="width: 120px;">
+          <span class="input-prefix">£</span>
+          <input type="number" id="microAmount" step="1" value="5">
+        </div>
+      </div>
+      <div class="micro-result" id="outMicroImpact">
+        A £5 saving knocks <span>--</span> off the mortgage.
+      </div>
+      <div class="quick-chips">
+        <button class="chip" onclick="setMicro(3)">£3 Coffee</button>
+        <button class="chip" onclick="setMicro(15)">£15 Takeout</button>
+        <button class="chip" onclick="setMicro(50)">£50 Shift</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const fields = ['balance', 'rate', 'termYears', 'termMonths', 'payoffFund', 'microAmount'];
+
+    function loadState() {
+      fields.forEach(id => {
+        const val = localStorage.getItem('m_calc_' + id);
+        if (val !== null) {
+          document.getElementById(id).value = val;
+        }
+      });
+    }
+
+    function saveState() {
+      fields.forEach(id => {
+        const val = document.getElementById(id).value;
+        localStorage.setItem('m_calc_' + id, val);
+      });
+    }
+
+    function setMicro(val) {
+      document.getElementById('microAmount').value = val;
+      compute();
+      saveState();
+    }
+
+    function compute() {
+      const balance = Math.max(0, parseFloat(document.getElementById('balance').value) || 0);
+      const rateAnnual = (parseFloat(document.getElementById('rate').value) || 0) / 100;
+      const termYears = parseInt(document.getElementById('termYears').value) || 0;
+      const termMonths = parseInt(document.getElementById('termMonths').value) || 0;
+      const payoffFund = Math.max(0, parseFloat(document.getElementById('payoffFund').value) || 0);
+      const microAmount = Math.max(0, parseFloat(document.getElementById('microAmount').value) || 0);
+
+      const N = (termYears * 12) + termMonths;
+      const r = rateAnnual / 12;
+
+      if (balance <= 0 || N <= 0) {
+        document.getElementById('outTimeSaved').innerText = '0 days';
+        document.getElementById('outPayment').innerText = '£0.00';
+        return;
+      }
+
+      // 1. Calculate Monthly Repayment (standard annuity)
+      let payment = 0;
+      if (r === 0) {
+        payment = balance / N;
+      } else {
+        payment = (balance * r * Math.pow(1 + r, N)) / (Math.pow(1 + r, N) - 1);
+      }
+      document.getElementById('outPayment').innerText = '£' + payment.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      // 2. Base Amortization & Total Interest Without Lump Sum
+      const totalBaseCost = payment * N;
+      const baseInterest = totalBaseCost - balance;
+
+      // 3. New Term with Pay Off Fund applied
+      const newBal = Math.max(0, balance - payoffFund);
+      let newMonthsExact = 0;
+
+      if (newBal === 0) {
+        newMonthsExact = 0;
+      } else if (r === 0) {
+        newMonthsExact = newBal / payment;
+      } else {
+        const numerator = 1 - (r * newBal) / payment;
+        if (numerator <= 0) {
+          newMonthsExact = 0; // Overpayment cleared loan
+        } else {
+          newMonthsExact = -Math.log(numerator) / Math.log(1 + r);
+        }
+      }
+
+      const monthsSaved = Math.max(0, N - newMonthsExact);
+      document.getElementById('outTimeSaved').innerText = formatDetailedTime(monthsSaved);
+
+      // Total interest saved
+      const newTotalPaid = payment * newMonthsExact;
+      const newTotalInterest = Math.max(0, newTotalPaid - newBal);
+      const interestSaved = Math.max(0, baseInterest - newTotalInterest);
+      document.getElementById('outInterestSaved').innerText = `Interest saved: £${interestSaved.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      // Format New Remaining Term
+      const newY = Math.floor(newMonthsExact / 12);
+      const newM = Math.floor(newMonthsExact % 12);
+      document.getElementById('outNewTerm').innerText = `${newY}y ${newM}m`;
+
+      // 4. Micro-Savings Calculation (Exact derivative at current balance)
+      if (microAmount > 0 && payment > (r * balance)) {
+        // dN/dB = r / ( ln(1+r) * (Payment - r*B) )
+        const dN_dB = (r === 0) 
+          ? (1 / payment) 
+          : (r / (Math.log(1 + r) * (payment - r * balance)));
+        
+        const microMonthsSaved = dN_dB * microAmount;
+        document.getElementById('outMicroImpact').innerHTML = 
+          `A £${microAmount.toFixed(0)} saving knocks <span>${formatMicroTime(microMonthsSaved)}</span> off the tail end.`;
+      } else {
+        document.getElementById('outMicroImpact').innerHTML = `Enter an amount to see time saved.`;
+      }
+    }
+
+    function formatDetailedTime(monthsFloat) {
+      if (monthsFloat <= 0) return '0 days';
+      const daysTotal = monthsFloat * (365.25 / 12);
+      
+      const years = Math.floor(daysTotal / 365.25);
+      const remDays = daysTotal % 365.25;
+      const months = Math.floor(remDays / (365.25 / 12));
+      const days = Math.floor(remDays % (365.25 / 12));
+
+      let parts = [];
+      if (years > 0) parts.push(`${years}y`);
+      if (months > 0) parts.push(`${months}m`);
+      if (days > 0 || parts.length === 0) parts.push(`${days}d`);
+
+      return parts.join(' ');
+    }
+
+    function formatMicroTime(monthsFloat) {
+      const minutesTotal = monthsFloat * (365.25 / 12) * 24 * 60;
+      
+      const hours = Math.floor(minutesTotal / 60);
+      const mins = Math.round(minutesTotal % 60);
+
+      if (hours >= 24) {
+        const days = (hours / 24).toFixed(1);
+        return `${days} days`;
+      }
+      if (hours > 0) {
+        return `${hours} hr${hours > 1 ? 's' : ''} and ${mins} min${mins !== 1 ? 's' : ''}`;
+      }
+      return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    }
+
+    // Attach event listeners
+    fields.forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        compute();
+        saveState();
+      });
+    });
+
+    // Initial load
+    loadState();
+    compute();
+  </script>
+</body>
+</html>
