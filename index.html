@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="Mortgage Freedom">
   <meta name="theme-color" content="#0b0f19">
   
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><path d='M25 50 L50 25 L75 50 V75 H60 V75 H25 Z' fill='%2310b981'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><path d='M25 50 L50 25 L75 50 V75 H60 V60 H40 V75 H25 Z' fill='%2310b981'/></svg>">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2310b981'/></svg>">
 
   <style>
@@ -183,11 +183,12 @@
     }
 
     .main-metric {
-      font-size: 1.85rem;
+      font-size: 1.95rem;
       font-weight: 800;
       color: #ffffff;
       margin: 6px 0 2px;
       line-height: 1.2;
+      letter-spacing: -0.01em;
     }
 
     .sub-metric {
@@ -352,7 +353,7 @@
   <!-- Inputs: Mortgage Details -->
   <section class="card">
     <div class="card-title">
-      <span>Santander Mortgage Details</span>
+      <span>Mortgage Details</span>
       <button class="btn-secondary" onclick="resetBaselineDate()">Set Today as Baseline</button>
     </div>
 
@@ -513,7 +514,6 @@
       compute();
     }
 
-    // Calculates elapsed calendar months between statement baseline and today
     function getElapsedMonths(baselineDateStr) {
       if (!baselineDateStr) return 0;
       const start = new Date(baselineDateStr);
@@ -522,7 +522,7 @@
 
       let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
       if (now.getDate() < start.getDate()) {
-        months -= 1; // Month hasn't fully passed yet
+        months -= 1;
       }
       return Math.max(0, months);
     }
@@ -542,7 +542,7 @@
       const baseTermMonths = (termYears * 12) + termMonths;
       const elapsed = getElapsedMonths(baselineDateStr);
 
-      // Step 1: Amortize baseline balance down by elapsed months
+      // 1. Amortize baseline balance down by elapsed months
       let currBalance = baseBalance;
       for (let i = 0; i < elapsed; i++) {
         const interest = currBalance * r;
@@ -560,7 +560,7 @@
       const totalPot = cashFund + stocksFund;
       document.getElementById('outTotalPot').innerText = `Total Combined Pot: £${totalPot.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-      // Step 2: Forecast Scenarios (Low 4%, Med 7%, High 10% annual stock growth)
+      // 2. Forecast Scenarios (Low 4%, Med 7%, High 10% annual stock growth)
       const lowResult = projectPayoffTime(currBalance, payment, r, cashFund, stocksFund, 0.04);
       const medResult = projectPayoffTime(currBalance, payment, r, cashFund, stocksFund, 0.07);
       const highResult = projectPayoffTime(currBalance, payment, r, cashFund, stocksFund, 0.10);
@@ -569,12 +569,13 @@
       const savedMed = Math.max(0, remainingBaselineMonths - medResult.months);
       const savedHigh = Math.max(0, remainingBaselineMonths - highResult.months);
 
-      document.getElementById('outPrimarySaved').innerText = formatDetailedTime(savedMed);
-      document.getElementById('outMed').innerText = formatDetailedTime(savedMed);
-      document.getElementById('outLow').innerText = formatDetailedTime(savedLow);
-      document.getElementById('outHigh').innerText = formatDetailedTime(savedHigh);
+      // Headline output in Months and Days
+      document.getElementById('outPrimarySaved').innerText = formatMonthsAndDays(savedMed);
+      document.getElementById('outMed').innerText = formatMonthsAndDays(savedMed);
+      document.getElementById('outLow').innerText = formatMonthsAndDays(savedLow);
+      document.getElementById('outHigh').innerText = formatMonthsAndDays(savedHigh);
 
-      // Step 3: Micro-Savings Calculation
+      // 3. Micro-Savings Calculation
       if (microAmount > 0 && payment > (r * currBalance) && currBalance > 0) {
         const dN_dB = (r === 0) 
           ? (1 / payment) 
@@ -588,7 +589,6 @@
       }
     }
 
-    // Projects the exact month when growing pot crosses remaining mortgage debt
     function projectPayoffTime(startBal, monthlyPmt, monthlyRate, startCash, startStocks, annualStockGrowth) {
       const monthlyStockGrowth = annualStockGrowth / 12;
       let bal = startBal;
@@ -599,14 +599,12 @@
         return { months: 0 };
       }
 
-      const maxMonths = 600; // 50 years cap
+      const maxMonths = 600;
       for (let m = 1; m <= maxMonths; m++) {
-        // Amortize loan
         const interest = bal * monthlyRate;
         const principal = monthlyPmt - interest;
         bal = Math.max(0, bal - principal);
 
-        // Grow stocks
         stocks = stocks * (1 + monthlyStockGrowth);
 
         if ((cash + stocks) >= bal || bal === 0) {
@@ -617,21 +615,15 @@
       return { months: maxMonths };
     }
 
-    function formatDetailedTime(monthsFloat) {
-      if (monthsFloat <= 0) return '0 days';
-      const daysTotal = monthsFloat * (365.25 / 12);
-      
-      const years = Math.floor(daysTotal / 365.25);
-      const remDays = daysTotal % 365.25;
-      const months = Math.floor(remDays / (365.25 / 12));
-      const days = Math.floor(remDays % (365.25 / 12));
+    // Displays purely in Months and Days (e.g. "36m 12d" or "0m 4d")
+    function formatMonthsAndDays(monthsFloat) {
+      if (monthsFloat <= 0) return '0m 0d';
 
-      let parts = [];
-      if (years > 0) parts.push(`${years}y`);
-      if (months > 0) parts.push(`${months}m`);
-      if (days > 0 || parts.length === 0) parts.push(`${days}d`);
+      const months = Math.floor(monthsFloat);
+      const fracMonth = monthsFloat - months;
+      const days = Math.round(fracMonth * (365.25 / 12));
 
-      return parts.join(' ');
+      return `${months}m ${days}d`;
     }
 
     function formatMicroTime(monthsFloat) {
@@ -650,7 +642,6 @@
       return `${mins} min${mins !== 1 ? 's' : ''}`;
     }
 
-    // Attach listeners
     fields.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
