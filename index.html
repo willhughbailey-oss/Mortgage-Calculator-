@@ -1,833 +1,668 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mortgage vs. Investment Payoff Tracker (£)</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #f3f4f6;
-        }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mortgage Freedom</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mortgage Freedom">
+  <meta name="theme-color" content="#0b0f19">
+  
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><path d='M25 50 L50 25 L75 50 V75 H60 V75 H25 Z' fill='%2310b981'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2310b981'/></svg>">
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #161f30;
+      --card-border: #243048;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.15);
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 20px);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 14px 4px 18px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: -6px;
+      margin-bottom: 12px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .input-group.full {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 12px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      pointer-events: none;
+    }
+
+    input[type="number"], input[type="date"] {
+      width: 100%;
+      background: #0f1624;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+      font-family: inherit;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+    }
+
+    .with-prefix input {
+      padding-left: 28px;
+    }
+
+    .with-suffix input {
+      padding-right: 36px;
+    }
+
+    /* Output Section */
+    .highlight-box {
+      background: linear-gradient(145deg, #13242b, #152c28);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 16px;
+      padding: 18px 16px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .highlight-box .tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+    }
+
+    .main-metric {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 6px 0 2px;
+      line-height: 1.2;
+    }
+
+    .sub-metric {
+      font-size: 0.82rem;
+      color: #a7f3d0;
+    }
+
+    /* Scenarios breakdown */
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 6px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .scenario-item {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 8px;
+      padding: 6px 4px;
+    }
+
+    .scenario-item.highlight {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .scenario-item .s-label {
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+
+    .scenario-item .s-val {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-top: 2px;
+    }
+
+    /* Micro Section */
+    .micro-container {
+      background: rgba(16, 185, 129, 0.04);
+      border: 1px dashed var(--accent);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .micro-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .micro-result {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #f8fafc;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+
+    .micro-result span {
+      color: var(--accent);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #0b0f19;
+      border: none;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: #0f1624;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      background: #0f1624;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 16px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .chip:active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .amort-notice {
+      background: #0f1624;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
 </head>
-<body class="text-gray-800 p-3 sm:p-6 md:p-8 min-h-screen">
-    <div class="max-w-4xl mx-auto space-y-6">
+<body>
 
-        <!-- Header -->
-        <header class="text-center space-y-2">
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Mortgage vs. Investment Payoff Tracker
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
-                Track when your liquid funds can eliminate your mortgage, factoring in investment growth, cash savings, and micro-contributions.
-            </p>
-        </header>
+  <header>
+    <h1>Mortgage Freedom Tracker</h1>
+    <p>Dynamic Amortisation & Growth Forecasting</p>
+  </header>
 
-        <!-- Main Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- Output Highlight -->
+  <section class="highlight-box">
+    <div class="tag">Estimated Time Knocked Off (Medium Growth)</div>
+    <div class="main-metric" id="outPrimarySaved">-</div>
+    <div class="sub-metric" id="outTotalPot">Total Combined Pot: £0.00</div>
 
-            <!-- Card 1: Mortgage Details -->
-            <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-4">
-                <div class="flex items-center justify-between border-b pb-3">
-                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <span>🏡</span> Mortgage Details
-                    </h2>
-                    <span class="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2.5 py-1 rounded-full">
-                        Auto-Amortizing
-                    </span>
-                </div>
+    <!-- Scenarios -->
+    <div class="scenarios-grid">
+      <div class="scenario-item">
+        <div class="s-label">Low (4% Stocks)</div>
+        <div class="s-val" id="outLow">-</div>
+      </div>
+      <div class="scenario-item highlight">
+        <div class="s-label">Medium (7% Stocks)</div>
+        <div class="s-val" id="outMed">-</div>
+      </div>
+      <div class="scenario-item">
+        <div class="s-label">High (10% Stocks)</div>
+        <div class="s-val" id="outHigh">-</div>
+      </div>
+    </div>
+  </section>
 
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="startDate">
-                            Initial Balance Recorded Date
-                        </label>
-                        <input type="date" id="startDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        <p class="text-[11px] text-gray-500 mt-1">The date when your initial principal figure was accurate.</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="initialPrincipal">
-                                Initial Principal (£)
-                            </label>
-                            <input type="number" id="initialPrincipal" min="1" step="0.01" value="250000" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="annualRate">
-                                Interest Rate (%)
-                            </label>
-                            <input type="number" id="annualRate" min="0.01" step="0.01" value="4.5" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="monthlyPayment">
-                            Regular Monthly Payment (£)
-                        </label>
-                        <input type="number" id="monthlyPayment" min="1" step="0.01" value="1390" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    </div>
-
-                    <!-- Live Amortized Balance Today -->
-                    <div class="bg-gray-50 rounded-xl p-3.5 border border-gray-200 mt-3 space-y-1">
-                        <div class="flex justify-between items-center text-xs text-gray-600">
-                            <span>Elapsed Time Since Start:</span>
-                            <span id="elapsedMonthsLabel" class="font-semibold text-gray-800">0 months</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-semibold text-gray-700">Recalculated Balance Today:</span>
-                            <span id="currentCalculatedPrincipal" class="text-base font-bold text-indigo-700">£250,000.00</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Card 2: Savings & Investment Pots -->
-            <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-4">
-                <div class="flex items-center justify-between border-b pb-3">
-                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <span>📈</span> Savings & Investment Pots
-                    </h2>
-                    <span class="text-xs bg-emerald-50 text-emerald-700 font-semibold px-2.5 py-1 rounded-full">
-                        Liquid Wealth
-                    </span>
-                </div>
-
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="stocksValue">
-                            Stocks & Shares Fund Value (£)
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-2 text-gray-400 font-medium">£</span>
-                            <input type="number" id="stocksValue" min="0" step="0.01" value="5000" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        </div>
-                        <p class="text-[11px] text-gray-500 mt-1">Grows based on Low, Medium, or High growth scenarios.</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="cashValue">
-                            Cash Savings Fund Value (£)
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-2 text-gray-400 font-medium">£</span>
-                            <input type="number" id="cashValue" min="0" step="0.01" value="2000" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        </div>
-                        <p class="text-[11px] text-gray-500 mt-1">Guaranteed capital, ready for lump-sum mortgage reduction.</p>
-                    </div>
-
-                    <!-- Total Liquid Funds -->
-                    <div class="bg-emerald-50/70 rounded-xl p-3.5 border border-emerald-200 flex justify-between items-center">
-                        <span class="text-xs font-semibold text-emerald-900">Total Liquid Pot:</span>
-                        <span id="totalLiquidPot" class="text-base font-bold text-emerald-800">£7,000.00</span>
-                    </div>
-
-                    <!-- Stocks Growth Scenario Rates -->
-                    <div class="pt-2 border-t border-gray-100">
-                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                            Annual Stocks Growth Assumptions (%)
-                        </label>
-                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                            <div class="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Low</span>
-                                <input type="number" id="growthLow" value="4.0" step="0.1" class="w-full text-center bg-white border border-gray-300 rounded mt-1 p-1 font-semibold text-gray-800 text-xs">
-                            </div>
-                            <div class="bg-emerald-50/80 p-2 rounded-lg border border-emerald-300">
-                                <span class="text-emerald-700 block text-[10px] uppercase font-bold">Medium (Primary)</span>
-                                <input type="number" id="growthMed" value="7.0" step="0.1" class="w-full text-center bg-white border border-emerald-400 rounded mt-1 p-1 font-bold text-emerald-900 text-xs">
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                <span class="text-gray-500 block text-[10px] uppercase font-bold">High</span>
-                                <input type="number" id="growthHigh" value="10.0" step="0.1" class="w-full text-center bg-white border border-gray-300 rounded mt-1 p-1 font-semibold text-gray-800 text-xs">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Card 3: Micro-Savings Live Simulator & Quick Add -->
-        <section class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl shadow-sm border border-amber-200 p-5 sm:p-6 space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                    <h2 class="text-lg font-bold text-amber-950 flex items-center gap-2">
-                        <span>⚡</span> Micro-Savings Impact Simulator
-                    </h2>
-                    <p class="text-xs text-amber-800">
-                        Type an amount to instantly see how many days or weeks it knocks off your mortgage.
-                    </p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="setMicroAmount(25)" class="text-xs bg-white/80 hover:bg-white text-amber-900 font-semibold px-2 py-1 rounded border border-amber-200">+£25</button>
-                    <button type="button" onclick="setMicroAmount(50)" class="text-xs bg-white/80 hover:bg-white text-amber-900 font-semibold px-2 py-1 rounded border border-amber-200">+£50</button>
-                    <button type="button" onclick="setMicroAmount(100)" class="text-xs bg-white/80 hover:bg-white text-amber-900 font-semibold px-2 py-1 rounded border border-amber-200">+£100</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end pt-2">
-                <div class="sm:col-span-1">
-                    <label class="block text-xs font-semibold text-amber-900 uppercase tracking-wider mb-1" for="microSavingsInput">
-                        Micro-Saving Amount (£)
-                    </label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2.5 text-amber-600 font-medium text-sm">£</span>
-                        <input type="number" id="microSavingsInput" min="0" step="1" placeholder="e.g. 50" class="w-full pl-7 pr-3 py-2.5 bg-white border border-amber-300 rounded-xl text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="sm:col-span-1 bg-white/90 p-2.5 rounded-xl border border-amber-200 flex flex-col justify-center min-h-[46px]">
-                    <span class="text-[10px] uppercase font-bold text-amber-800 tracking-wider">Live Time Saved:</span>
-                    <span id="microSavingsTimeSaved" class="text-sm font-extrabold text-amber-950">
-                        Enter amount above
-                    </span>
-                </div>
-
-                <div class="sm:col-span-1">
-                    <button type="button" id="addMicroToCashBtn" class="w-full py-2.5 px-4 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-1.5">
-                        <span>➕</span> Add to Cash Savings
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Card 4: Primary Results & Growth Scenarios -->
-        <section class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
-            <!-- Top Banner (Medium Scenario) -->
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-5 sm:p-7 space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs uppercase font-bold tracking-widest bg-white/20 text-white px-3 py-1 rounded-full">
-                        Primary Forecast (Medium Growth: <span id="bannerMedRate">7%</span>)
-                    </span>
-                    <span class="text-xs text-white/80" id="originalMaturityLabel">Original Term: --</span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    <div>
-                        <p class="text-xs uppercase tracking-wider text-emerald-100 font-medium">Mortgage Cover Date</p>
-                        <p id="medCoverDate" class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-0.5">Calculating...</p>
-                        <p class="text-xs text-emerald-100 mt-1">Date when investments + cash fully cover remaining balance.</p>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-wider text-emerald-100 font-medium">Total Time Saved</p>
-                        <p id="medTimeSaved" class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-0.5 text-amber-300">Calculating...</p>
-                        <p class="text-xs text-emerald-100 mt-1">Ahead of your standard mortgage finish date.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Comparison Table for 3 Scenarios -->
-            <div class="p-5 sm:p-6 space-y-4">
-                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">
-                    Investment Growth Scenario Comparison
-                </h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <!-- Low Scenario Card -->
-                    <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/70 space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-gray-600 uppercase">Low Growth</span>
-                            <span class="text-xs font-semibold text-gray-500" id="cardLowRate">4%</span>
-                        </div>
-                        <div>
-                            <p class="text-[11px] text-gray-500 uppercase font-semibold">Payoff Date</p>
-                            <p id="lowCoverDate" class="text-sm font-bold text-gray-800">--</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] text-gray-500 uppercase font-semibold">Time Saved</p>
-                            <p id="lowTimeSaved" class="text-base font-extrabold text-indigo-700">--</p>
-                        </div>
-                    </div>
-
-                    <!-- Medium Scenario Card (Highlighted) -->
-                    <div class="p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 space-y-2 relative">
-                        <span class="absolute -top-2.5 right-3 bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
-                            Primary
-                        </span>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-emerald-900 uppercase">Medium Growth</span>
-                            <span class="text-xs font-semibold text-emerald-700" id="cardMedRate">7%</span>
-                        </div>
-                        <div>
-                            <p class="text-[11px] text-emerald-800 uppercase font-semibold">Payoff Date</p>
-                            <p id="cardMedCoverDate" class="text-sm font-bold text-emerald-950">--</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] text-emerald-800 uppercase font-semibold">Time Saved</p>
-                            <p id="cardMedTimeSaved" class="text-base font-extrabold text-emerald-700">--</p>
-                        </div>
-                    </div>
-
-                    <!-- High Scenario Card -->
-                    <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/70 space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-gray-600 uppercase">High Growth</span>
-                            <span class="text-xs font-semibold text-gray-500" id="cardHighRate">10%</span>
-                        </div>
-                        <div>
-                            <p class="text-[11px] text-gray-500 uppercase font-semibold">Payoff Date</p>
-                            <p id="highCoverDate" class="text-sm font-bold text-gray-800">--</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] text-gray-500 uppercase font-semibold">Time Saved</p>
-                            <p id="highTimeSaved" class="text-base font-extrabold text-indigo-700">--</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Original Schedule Reference -->
-                <div class="pt-3 border-t border-gray-100 flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2">
-                    <div>
-                        Original Mortgage Completion: <span id="originalEndDateText" class="font-semibold text-gray-800">--</span>
-                    </div>
-                    <div>
-                        Total Original Term: <span id="originalTermText" class="font-semibold text-gray-800">--</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Card 5: Scheduled Future Lump-Sum Contributions -->
-        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-4">
-            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span>🗓️</span> Planned Future Lump-Sum Additions
-            </h2>
-            <p class="text-xs text-gray-600">
-                Plan one-off bonuses, tax refunds, or maturing deposits that you intend to add directly to your liquid pot.
-            </p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-7 gap-3 items-end">
-                <div class="sm:col-span-3">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="contribAmount">
-                        Amount (£)
-                    </label>
-                    <input type="number" id="contribAmount" min="1" step="0.01" placeholder="e.g. 1000" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
-                <div class="sm:col-span-3">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1" for="contribDate">
-                        Scheduled Date
-                    </label>
-                    <input type="date" id="contribDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
-                <div class="sm:col-span-1">
-                    <button type="button" id="addContribBtn" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm transition">
-                        Save
-                    </button>
-                </div>
-            </div>
-
-            <!-- List -->
-            <div id="contributionsContainer" class="pt-2">
-                <ul id="contributionsUl" class="space-y-2"></ul>
-            </div>
-        </section>
-
+  <!-- Inputs: Mortgage Details -->
+  <section class="card">
+    <div class="card-title">
+      <span>Santander Mortgage Details</span>
+      <button class="btn-secondary" onclick="resetBaselineDate()">Set Today as Baseline</button>
     </div>
 
-    <!-- Application Script -->
-    <script>
-        // --- CONSTANTS & HELPERS ---
-        const AVG_DAYS_PER_MONTH = 365.25 / 12; // ~30.4375 days
-        const STORAGE_KEY = 'mortgage_payoff_tracker_v4_data';
+    <div class="input-grid">
+      <div class="input-group">
+        <label for="balance">Baseline Balance</label>
+        <div class="input-wrapper with-prefix">
+          <span class="input-prefix">£</span>
+          <input type="number" id="balance" step="100" value="145000">
+        </div>
+      </div>
 
-        const dom = {
-            startDate: document.getElementById('startDate'),
-            initialPrincipal: document.getElementById('initialPrincipal'),
-            annualRate: document.getElementById('annualRate'),
-            monthlyPayment: document.getElementById('monthlyPayment'),
-            elapsedMonthsLabel: document.getElementById('elapsedMonthsLabel'),
-            currentCalculatedPrincipal: document.getElementById('currentCalculatedPrincipal'),
+      <div class="input-group">
+        <label for="payment">Monthly Payment</label>
+        <div class="input-wrapper with-prefix">
+          <span class="input-prefix">£</span>
+          <input type="number" id="payment" step="10" value="850">
+        </div>
+      </div>
 
-            stocksValue: document.getElementById('stocksValue'),
-            cashValue: document.getElementById('cashValue'),
-            totalLiquidPot: document.getElementById('totalLiquidPot'),
+      <div class="input-group full">
+        <label for="rate">Annual Interest Rate</label>
+        <div class="input-wrapper with-suffix">
+          <input type="number" id="rate" step="0.01" value="4.50">
+          <span class="input-suffix">%</span>
+        </div>
+      </div>
 
-            growthLow: document.getElementById('growthLow'),
-            growthMed: document.getElementById('growthMed'),
-            growthHigh: document.getElementById('growthHigh'),
+      <div class="input-group">
+        <label for="termYears">Baseline Term (Years)</label>
+        <div class="input-wrapper with-suffix">
+          <input type="number" id="termYears" min="0" max="45" value="20">
+          <span class="input-suffix">yrs</span>
+        </div>
+      </div>
 
-            bannerMedRate: document.getElementById('bannerMedRate'),
-            cardMedRate: document.getElementById('cardMedRate'),
-            cardLowRate: document.getElementById('cardLowRate'),
-            cardHighRate: document.getElementById('cardHighRate'),
+      <div class="input-group">
+        <label for="termMonths">Baseline Term (Months)</label>
+        <div class="input-wrapper with-suffix">
+          <input type="number" id="termMonths" min="0" max="11" value="0">
+          <span class="input-suffix">mo</span>
+        </div>
+      </div>
 
-            microSavingsInput: document.getElementById('microSavingsInput'),
-            microSavingsTimeSaved: document.getElementById('microSavingsTimeSaved'),
-            addMicroToCashBtn: document.getElementById('addMicroToCashBtn'),
+      <div class="input-group full">
+        <label for="baselineDate">Baseline Statement Date</label>
+        <div class="input-wrapper">
+          <input type="date" id="baselineDate">
+        </div>
+      </div>
+    </div>
 
-            originalMaturityLabel: document.getElementById('originalMaturityLabel'),
-            originalEndDateText: document.getElementById('originalEndDateText'),
-            originalTermText: document.getElementById('originalTermText'),
+    <div class="amort-notice">
+      <span id="amortStatus">Elapsed: 0 months</span>
+      <span id="effectiveBalance">Current: £0</span>
+    </div>
+  </section>
 
-            medCoverDate: document.getElementById('medCoverDate'),
-            medTimeSaved: document.getElementById('medTimeSaved'),
-            cardMedCoverDate: document.getElementById('cardMedCoverDate'),
-            cardMedTimeSaved: document.getElementById('cardMedTimeSaved'),
+  <!-- Inputs: Payoff Fund Split -->
+  <section class="card">
+    <div class="card-title">Pay Off Fund Allocation</div>
+    <div class="card-subtitle">Split between liquid cash and invested stocks</div>
+    
+    <div class="input-grid">
+      <div class="input-group">
+        <label for="cashFund">Cash Fund</label>
+        <div class="input-wrapper with-prefix">
+          <span class="input-prefix">£</span>
+          <input type="number" id="cashFund" step="25" value="5000">
+        </div>
+      </div>
 
-            lowCoverDate: document.getElementById('lowCoverDate'),
-            lowTimeSaved: document.getElementById('lowTimeSaved'),
+      <div class="input-group">
+        <label for="stocksFund">Stocks & Shares Fund</label>
+        <div class="input-wrapper with-prefix">
+          <span class="input-prefix">£</span>
+          <input type="number" id="stocksFund" step="100" value="10000">
+        </div>
+      </div>
+    </div>
+  </section>
 
-            highCoverDate: document.getElementById('highCoverDate'),
-            highTimeSaved: document.getElementById('highTimeSaved'),
+  <!-- Micro-Savings Test & Push -->
+  <section class="card">
+    <div class="card-title">Micro-Savings Power</div>
+    <div class="micro-container">
+      <div class="micro-row">
+        <div class="input-wrapper with-prefix" style="flex: 1;">
+          <span class="input-prefix">£</span>
+          <input type="number" id="microAmount" step="1" value="5" placeholder="Amount">
+        </div>
+        <button class="btn" onclick="addMicroToCash()">+ Add to Cash</button>
+      </div>
 
-            contribAmount: document.getElementById('contribAmount'),
-            contribDate: document.getElementById('contribDate'),
-            addContribBtn: document.getElementById('addContribBtn'),
-            contributionsUl: document.getElementById('contributionsUl')
-        };
+      <div class="micro-result" id="outMicroImpact">
+        Saving £5 knocks <span>--</span> off.
+      </div>
 
-        let savedContributions = [];
+      <div class="quick-chips">
+        <button class="chip" onclick="setMicro(3)">£3 Coffee</button>
+        <button class="chip" onclick="setMicro(15)">£15 Takeout</button>
+        <button class="chip" onclick="setMicro(50)">£50 Extra</button>
+      </div>
+    </div>
+  </section>
 
-        // --- UTILITY FORMATTERS ---
-        function formatGBP(val) {
-            return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(val);
+  <script>
+    const fields = ['balance', 'payment', 'rate', 'termYears', 'termMonths', 'baselineDate', 'cashFund', 'stocksFund', 'microAmount'];
+
+    function getTodayString() {
+      const d = new Date();
+      return d.toISOString().split('T')[0];
+    }
+
+    function resetBaselineDate() {
+      document.getElementById('baselineDate').value = getTodayString();
+      saveState();
+      compute();
+    }
+
+    function loadState() {
+      fields.forEach(id => {
+        const val = localStorage.getItem('mf_' + id);
+        if (val !== null) {
+          document.getElementById(id).value = val;
         }
+      });
 
-        function formatDuration(totalMonths) {
-            if (totalMonths <= 0) return "0 Days";
-            const totalDays = totalMonths * AVG_DAYS_PER_MONTH;
+      if (!document.getElementById('baselineDate').value) {
+        document.getElementById('baselineDate').value = getTodayString();
+      }
+    }
 
-            const years = Math.floor(totalDays / 365.25);
-            const remainingDaysAfterYears = totalDays - (years * 365.25);
-            const months = Math.floor(remainingDaysAfterYears / AVG_DAYS_PER_MONTH);
-            const days = remainingDaysAfterYears - (months * AVG_DAYS_PER_MONTH);
+    function saveState() {
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) localStorage.setItem('mf_' + id, el.value);
+      });
+    }
 
-            const parts = [];
-            if (years > 0) parts.push(`${years} Year${years !== 1 ? 's' : ''}`);
-            if (months > 0) parts.push(`${months} Month${months !== 1 ? 's' : ''}`);
+    function setMicro(val) {
+      document.getElementById('microAmount').value = val;
+      compute();
+      saveState();
+    }
 
-            if (years === 0 && months === 0) {
-                parts.push(`${totalDays.toFixed(1)} Day${totalDays !== 1 ? 's' : ''}`);
-            } else if (days >= 0.05) {
-                parts.push(`${days.toFixed(1)} Day${days.toFixed(1) !== '1.0' ? 's' : ''}`);
-            }
+    function addMicroToCash() {
+      const micro = Math.max(0, parseFloat(document.getElementById('microAmount').value) || 0);
+      if (micro <= 0) return;
 
-            return parts.length > 0 ? parts.join(', ') : "0 Days";
+      const currentCash = Math.max(0, parseFloat(document.getElementById('cashFund').value) || 0);
+      const newCash = currentCash + micro;
+      
+      document.getElementById('cashFund').value = newCash.toFixed(2);
+      document.getElementById('microAmount').value = '';
+      
+      saveState();
+      compute();
+    }
+
+    // Calculates elapsed calendar months between statement baseline and today
+    function getElapsedMonths(baselineDateStr) {
+      if (!baselineDateStr) return 0;
+      const start = new Date(baselineDateStr);
+      const now = new Date();
+      if (isNaN(start.getTime())) return 0;
+
+      let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+      if (now.getDate() < start.getDate()) {
+        months -= 1; // Month hasn't fully passed yet
+      }
+      return Math.max(0, months);
+    }
+
+    function compute() {
+      const baseBalance = Math.max(0, parseFloat(document.getElementById('balance').value) || 0);
+      const payment = Math.max(0, parseFloat(document.getElementById('payment').value) || 0);
+      const rateAnnual = (parseFloat(document.getElementById('rate').value) || 0) / 100;
+      const termYears = parseInt(document.getElementById('termYears').value) || 0;
+      const termMonths = parseInt(document.getElementById('termMonths').value) || 0;
+      const baselineDateStr = document.getElementById('baselineDate').value;
+      const cashFund = Math.max(0, parseFloat(document.getElementById('cashFund').value) || 0);
+      const stocksFund = Math.max(0, parseFloat(document.getElementById('stocksFund').value) || 0);
+      const microAmount = Math.max(0, parseFloat(document.getElementById('microAmount').value) || 0);
+
+      const r = rateAnnual / 12;
+      const baseTermMonths = (termYears * 12) + termMonths;
+      const elapsed = getElapsedMonths(baselineDateStr);
+
+      // Step 1: Amortize baseline balance down by elapsed months
+      let currBalance = baseBalance;
+      for (let i = 0; i < elapsed; i++) {
+        const interest = currBalance * r;
+        const principal = payment - interest;
+        if (principal > 0) {
+          currBalance = Math.max(0, currBalance - principal);
         }
+      }
+      const remainingBaselineMonths = Math.max(0, baseTermMonths - elapsed);
 
-        function addMonthsToDate(dateObj, months) {
-            const result = new Date(dateObj.getTime());
-            const wholeMonths = Math.floor(months);
-            result.setMonth(result.getMonth() + wholeMonths);
-            const fractionalMonth = months - wholeMonths;
-            const extraDays = fractionalMonth * AVG_DAYS_PER_MONTH;
-            result.setDate(result.getDate() + Math.round(extraDays));
-            return result.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+      document.getElementById('amortStatus').innerText = `Elapsed: ${elapsed} mo since baseline`;
+      document.getElementById('effectiveBalance').innerText = `Current Bal: £${currBalance.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+      // Combined pot display
+      const totalPot = cashFund + stocksFund;
+      document.getElementById('outTotalPot').innerText = `Total Combined Pot: £${totalPot.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      // Step 2: Forecast Scenarios (Low 4%, Med 7%, High 10% annual stock growth)
+      const lowResult = projectPayoffTime(currBalance, payment, r, cashFund, stocksFund, 0.04);
+      const medResult = projectPayoffTime(currBalance, payment, r, cashFund, stocksFund, 0.07);
+      const highResult = projectPayoffTime(currBalance, payment, r, cashFund, stocksFund, 0.10);
+
+      const savedLow = Math.max(0, remainingBaselineMonths - lowResult.months);
+      const savedMed = Math.max(0, remainingBaselineMonths - medResult.months);
+      const savedHigh = Math.max(0, remainingBaselineMonths - highResult.months);
+
+      document.getElementById('outPrimarySaved').innerText = formatDetailedTime(savedMed);
+      document.getElementById('outMed').innerText = formatDetailedTime(savedMed);
+      document.getElementById('outLow').innerText = formatDetailedTime(savedLow);
+      document.getElementById('outHigh').innerText = formatDetailedTime(savedHigh);
+
+      // Step 3: Micro-Savings Calculation
+      if (microAmount > 0 && payment > (r * currBalance) && currBalance > 0) {
+        const dN_dB = (r === 0) 
+          ? (1 / payment) 
+          : (r / (Math.log(1 + r) * (payment - r * currBalance)));
+        
+        const microMonthsSaved = dN_dB * microAmount;
+        document.getElementById('outMicroImpact').innerHTML = 
+          `Saving £${microAmount.toFixed(0)} knocks <span>${formatMicroTime(microMonthsSaved)}</span> off the tail end.`;
+      } else {
+        document.getElementById('outMicroImpact').innerHTML = `Enter an amount to see time saved.`;
+      }
+    }
+
+    // Projects the exact month when growing pot crosses remaining mortgage debt
+    function projectPayoffTime(startBal, monthlyPmt, monthlyRate, startCash, startStocks, annualStockGrowth) {
+      const monthlyStockGrowth = annualStockGrowth / 12;
+      let bal = startBal;
+      let cash = startCash;
+      let stocks = startStocks;
+
+      if ((cash + stocks) >= bal) {
+        return { months: 0 };
+      }
+
+      const maxMonths = 600; // 50 years cap
+      for (let m = 1; m <= maxMonths; m++) {
+        // Amortize loan
+        const interest = bal * monthlyRate;
+        const principal = monthlyPmt - interest;
+        bal = Math.max(0, bal - principal);
+
+        // Grow stocks
+        stocks = stocks * (1 + monthlyStockGrowth);
+
+        if ((cash + stocks) >= bal || bal === 0) {
+          return { months: m };
         }
-
-        function getElapsedMonths(startDateStr) {
-            if (!startDateStr) return 0;
-            const start = new Date(startDateStr + 'T00:00:00');
-            const now = new Date();
-            if (now <= start) return 0;
-
-            const yearDiff = now.getFullYear() - start.getFullYear();
-            const monthDiff = now.getMonth() - start.getMonth();
-            let months = (yearDiff * 12) + monthDiff;
-            if (now.getDate() < start.getDate()) {
-                months = Math.max(0, months - 1);
-            }
-            return months;
-        }
-
-        // --- LOCAL STORAGE ---
-        function loadSavedState() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) {
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    dom.startDate.value = todayStr;
-                    return;
-                }
-                const data = JSON.parse(raw);
-                if (data.startDate) dom.startDate.value = data.startDate;
-                if (data.initialPrincipal !== undefined) dom.initialPrincipal.value = data.initialPrincipal;
-                if (data.annualRate !== undefined) dom.annualRate.value = data.annualRate;
-                if (data.monthlyPayment !== undefined) dom.monthlyPayment.value = data.monthlyPayment;
-
-                if (data.stocksValue !== undefined) dom.stocksValue.value = data.stocksValue;
-                if (data.cashValue !== undefined) dom.cashValue.value = data.cashValue;
-
-                if (data.growthLow !== undefined) dom.growthLow.value = data.growthLow;
-                if (data.growthMed !== undefined) dom.growthMed.value = data.growthMed;
-                if (data.growthHigh !== undefined) dom.growthHigh.value = data.growthHigh;
-
-                if (Array.isArray(data.contributions)) {
-                    savedContributions = data.contributions;
-                }
-            } catch (err) {
-                console.error("Could not load from localStorage:", err);
-            }
-        }
-
-        function persistState() {
-            const data = {
-                startDate: dom.startDate.value,
-                initialPrincipal: parseFloat(dom.initialPrincipal.value) || 0,
-                annualRate: parseFloat(dom.annualRate.value) || 0,
-                monthlyPayment: parseFloat(dom.monthlyPayment.value) || 0,
-
-                stocksValue: parseFloat(dom.stocksValue.value) || 0,
-                cashValue: parseFloat(dom.cashValue.value) || 0,
-
-                growthLow: parseFloat(dom.growthLow.value) || 4.0,
-                growthMed: parseFloat(dom.growthMed.value) || 7.0,
-                growthHigh: parseFloat(dom.growthHigh.value) || 10.0,
-
-                contributions: savedContributions
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-
-        // --- SIMULATION ENGINE ---
-        function runAmortizationSchedule(principal, monthlyRate, monthlyPayment) {
-            let balance = principal;
-            let month = 0;
-            const schedule = [];
-            const maxCapMonths = 600; // 50 years
-
-            while (balance > 0.001 && month < maxCapMonths) {
-                month++;
-                const interestDue = balance * monthlyRate;
-                const principalPart = monthlyPayment - interestDue;
-
-                if (principalPart <= 0) {
-                    return { isPayable: false, schedule: [], totalMonths: Infinity };
-                }
-
-                if (balance <= principalPart) {
-                    // Final fractional month
-                    const fraction = (balance + interestDue) / monthlyPayment;
-                    const finalExactMonths = (month - 1) + Math.min(1, Math.max(0.001, fraction));
-                    schedule.push({ month, startBalance: balance, endBalance: 0, interest: interestDue });
-                    return { isPayable: true, schedule, totalMonths: finalExactMonths };
-                } else {
-                    const endBal = balance - principalPart;
-                    schedule.push({ month, startBalance: balance, endBalance: endBal, interest: interestDue });
-                    balance = endBal;
-                }
-            }
-
-            return { isPayable: balance <= 0.001, schedule, totalMonths: month };
-        }
-
-        function simulatePayoff(currentPrincipal, monthlyRate, monthlyPayment, initialStocks, initialCash, annualGrowthRate, contributions, baseDateObj, extraImmediateCash = 0) {
-            const monthlyGrowthFactor = Math.pow(1 + (annualGrowthRate / 100), 1 / 12);
-            let mortgageBalance = currentPrincipal;
-            let stocks = Math.max(0, initialStocks);
-            let cash = Math.max(0, initialCash + extraImmediateCash);
-
-            // Immediate check: Does liquid pot already cover the debt right now?
-            if (stocks + cash >= mortgageBalance) {
-                return {
-                    covered: true,
-                    coverMonths: 0,
-                    exactCoverDateStr: baseDateObj.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })
-                };
-            }
-
-            // Map scheduled contributions by month from baseDateObj
-            const contribMap = {};
-            contributions.forEach(c => {
-                const cDate = new Date(c.date + 'T00:00:00');
-                if (cDate > baseDateObj) {
-                    const diffYears = cDate.getFullYear() - baseDateObj.getFullYear();
-                    const diffMonths = (diffYears * 12) + (cDate.getMonth() - baseDateObj.getMonth());
-                    const mIdx = Math.max(1, diffMonths);
-                    contribMap[mIdx] = (contribMap[mIdx] || 0) + (parseFloat(c.amount) || 0);
-                }
-            });
-
-            let month = 0;
-            const maxSimMonths = 600;
-
-            while (mortgageBalance > 0.001 && month < maxSimMonths) {
-                month++;
-                const prevMortgage = mortgageBalance;
-                const prevTotalPot = stocks + cash;
-
-                // 1. Grow stocks
-                stocks = stocks * monthlyGrowthFactor;
-
-                // 2. Add scheduled contributions for this month to cash
-                if (contribMap[month]) {
-                    cash += contribMap[month];
-                }
-
-                // 3. Apply mortgage monthly payment
-                const interestDue = mortgageBalance * monthlyRate;
-                const principalPart = monthlyPayment - interestDue;
-
-                if (principalPart <= 0) {
-                    return { covered: false, coverMonths: Infinity };
-                }
-
-                mortgageBalance = Math.max(0, mortgageBalance - principalPart);
-                const currentTotalPot = stocks + cash;
-
-                // 4. Check for crossover in this month
-                if (currentTotalPot >= mortgageBalance) {
-                    // Fractional interpolation within this specific month
-                    const prevDeficit = prevMortgage - prevTotalPot;
-                    const endSurplus = currentTotalPot - mortgageBalance;
-                    const totalChange = prevDeficit + endSurplus;
-
-                    let fraction = 1;
-                    if (totalChange > 0) {
-                        fraction = Math.min(1, Math.max(0.01, prevDeficit / totalChange));
-                    }
-
-                    const exactMonths = (month - 1) + fraction;
-                    const coverDateStr = addMonthsToDate(baseDateObj, exactMonths);
-
-                    return {
-                        covered: true,
-                        coverMonths: exactMonths,
-                        exactCoverDateStr: coverDateStr
-                    };
-                }
-            }
-
-            return { covered: false, coverMonths: Infinity };
-        }
-
-        // --- CORE RECALCULATION ---
-        function recalculateAll() {
-            const startDateStr = dom.startDate.value;
-            const initialPrincipal = parseFloat(dom.initialPrincipal.value) || 0;
-            const annualRate = parseFloat(dom.annualRate.value) || 0;
-            const monthlyPayment = parseFloat(dom.monthlyPayment.value) || 0;
-
-            const stocks = parseFloat(dom.stocksValue.value) || 0;
-            const cash = parseFloat(dom.cashValue.value) || 0;
-            const totalLiquid = stocks + cash;
-
-            const growthLow = parseFloat(dom.growthLow.value) || 4.0;
-            const growthMed = parseFloat(dom.growthMed.value) || 7.0;
-            const growthHigh = parseFloat(dom.growthHigh.value) || 10.0;
-
-            dom.totalLiquidPot.textContent = formatGBP(totalLiquid);
-
-            // Update percentage labels
-            dom.bannerMedRate.textContent = `${growthMed}%`;
-            dom.cardMedRate.textContent = `${growthMed}%`;
-            dom.cardLowRate.textContent = `${growthLow}%`;
-            dom.cardHighRate.textContent = `${growthHigh}%`;
-
-            if (initialPrincipal <= 0 || annualRate <= 0 || monthlyPayment <= 0 || !startDateStr) {
-                dom.medCoverDate.textContent = "Please verify inputs";
-                dom.medTimeSaved.textContent = "--";
-                return;
-            }
-
-            const monthlyRate = (annualRate / 100) / 12;
-
-            // Check if monthly payment covers basic monthly interest
-            if (monthlyPayment <= (initialPrincipal * monthlyRate)) {
-                dom.medCoverDate.textContent = "Payment too low";
-                dom.medTimeSaved.textContent = "Never amortizes";
-                return;
-            }
-
-            // 1. Calculate Elapsed Months to determine Current Principal Balance Today
-            const elapsedMonths = getElapsedMonths(startDateStr);
-            dom.elapsedMonthsLabel.textContent = `${elapsedMonths} month${elapsedMonths !== 1 ? 's' : ''}`;
-
-            let currentPrincipalToday = initialPrincipal;
-            for (let m = 0; m < elapsedMonths; m++) {
-                const interest = currentPrincipalToday * monthlyRate;
-                const principalReduction = monthlyPayment - interest;
-                if (principalReduction > 0) {
-                    currentPrincipalToday = Math.max(0, currentPrincipalToday - principalReduction);
-                }
-                if (currentPrincipalToday <= 0) break;
-            }
-            dom.currentCalculatedPrincipal.textContent = formatGBP(currentPrincipalToday);
-
-            // 2. Original Amortization from today forward
-            const todayObj = new Date();
-            const originalFromToday = runAmortizationSchedule(currentPrincipalToday, monthlyRate, monthlyPayment);
-
-            if (!originalFromToday.isPayable) {
-                dom.medCoverDate.textContent = "Payment too low";
-                return;
-            }
-
-            const origRemainingMonths = originalFromToday.totalMonths;
-            const originalFinishDateStr = addMonthsToDate(todayObj, origRemainingMonths);
-
-            dom.originalEndDateText.textContent = originalFinishDateStr;
-            dom.originalTermText.textContent = formatDuration(origRemainingMonths);
-            dom.originalMaturityLabel.textContent = `Original Finish: ${originalFinishDateStr}`;
-
-            // 3. Run Scenarios (Medium is Primary)
-            const medResult = simulatePayoff(currentPrincipalToday, monthlyRate, monthlyPayment, stocks, cash, growthMed, savedContributions, todayObj);
-            const lowResult = simulatePayoff(currentPrincipalToday, monthlyRate, monthlyPayment, stocks, cash, growthLow, savedContributions, todayObj);
-            const highResult = simulatePayoff(currentPrincipalToday, monthlyRate, monthlyPayment, stocks, cash, growthHigh, savedContributions, todayObj);
-
-            // Render Medium (Primary)
-            if (medResult.covered) {
-                const savedMonths = Math.max(0, origRemainingMonths - medResult.coverMonths);
-                dom.medCoverDate.textContent = medResult.exactCoverDateStr;
-                dom.medTimeSaved.textContent = formatDuration(savedMonths);
-
-                dom.cardMedCoverDate.textContent = medResult.exactCoverDateStr;
-                dom.cardMedTimeSaved.textContent = formatDuration(savedMonths);
-            } else {
-                dom.medCoverDate.textContent = "Not Achieved";
-                dom.medTimeSaved.textContent = "0 Days";
-                dom.cardMedCoverDate.textContent = "Not Achieved";
-                dom.cardMedTimeSaved.textContent = "0 Days";
-            }
-
-            // Render Low
-            if (lowResult.covered) {
-                const savedLow = Math.max(0, origRemainingMonths - lowResult.coverMonths);
-                dom.lowCoverDate.textContent = lowResult.exactCoverDateStr;
-                dom.lowTimeSaved.textContent = formatDuration(savedLow);
-            } else {
-                dom.lowCoverDate.textContent = "Not Achieved";
-                dom.lowTimeSaved.textContent = "0 Days";
-            }
-
-            // Render High
-            if (highResult.covered) {
-                const savedHigh = Math.max(0, origRemainingMonths - highResult.coverMonths);
-                dom.highCoverDate.textContent = highResult.exactCoverDateStr;
-                dom.highTimeSaved.textContent = formatDuration(savedHigh);
-            } else {
-                dom.highCoverDate.textContent = "Not Achieved";
-                dom.highTimeSaved.textContent = "0 Days";
-            }
-
-            // 4. Update Live Micro-Savings Preview
-            updateMicroSavingsLive(currentPrincipalToday, monthlyRate, monthlyPayment, stocks, cash, growthMed, todayObj, origRemainingMonths, medResult);
-
-            persistState();
-        }
-
-        // --- MICRO-SAVINGS PREVIEW LOGIC ---
-        function updateMicroSavingsLive(currentPrincipal, monthlyRate, monthlyPayment, stocks, cash, growthRate, todayObj, origRemainingMonths, baselineResult) {
-            const extraVal = parseFloat(dom.microSavingsInput.value) || 0;
-            if (extraVal <= 0) {
-                dom.microSavingsTimeSaved.textContent = "Type an amount above";
-                return;
-            }
-
-            const simWithExtra = simulatePayoff(currentPrincipal, monthlyRate, monthlyPayment, stocks, cash, growthRate, savedContributions, todayObj, extraVal);
-
-            if (simWithExtra.covered && baselineResult.covered) {
-                const baselineSavedMonths = origRemainingMonths - baselineResult.coverMonths;
-                const newSavedMonths = origRemainingMonths - simWithExtra.coverMonths;
-                const deltaMonths = Math.max(0, newSavedMonths - baselineSavedMonths);
-
-                const durationStr = formatDuration(deltaMonths);
-                dom.microSavingsTimeSaved.textContent = `+${durationStr} faster`;
-            } else {
-                dom.microSavingsTimeSaved.textContent = "Calculated at payoff";
-            }
-        }
-
-        function setMicroAmount(val) {
-            dom.microSavingsInput.value = val;
-            recalculateAll();
-        }
-
-        // --- CONTRIBUTIONS MANAGEMENT ---
-        function renderContributions() {
-            dom.contributionsUl.innerHTML = '';
-            if (savedContributions.length === 0) {
-                dom.contributionsUl.innerHTML = '<li class="text-xs text-gray-400 italic">No future one-off contributions added yet.</li>';
-                return;
-            }
-
-            savedContributions.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            savedContributions.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-xs';
-                const dateFormatted = new Date(item.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                li.innerHTML = `
-                    <span class="font-medium text-gray-800">${formatGBP(item.amount)} on <span class="text-gray-500">${dateFormatted}</span></span>
-                    <button type="button" onclick="deleteContribution(${index})" class="text-red-600 hover:text-red-800 font-semibold px-2 py-0.5 rounded hover:bg-red-50">Delete</button>
-                `;
-                dom.contributionsUl.appendChild(li);
-            });
-        }
-
-        window.deleteContribution = function(idx) {
-            savedContributions.splice(idx, 1);
-            renderContributions();
-            recalculateAll();
-        };
-
-        // --- EVENT LISTENERS ---
-        function attachListeners() {
-            const inputs = [
-                dom.startDate, dom.initialPrincipal, dom.annualRate, dom.monthlyPayment,
-                dom.stocksValue, dom.cashValue, dom.growthLow, dom.growthMed, dom.growthHigh
-            ];
-
-            inputs.forEach(input => {
-                input.addEventListener('input', recalculateAll);
-                input.addEventListener('change', recalculateAll);
-            });
-
-            // Live micro savings input
-            dom.microSavingsInput.addEventListener('input', recalculateAll);
-
-            // Add Micro to Cash Button
-            dom.addMicroToCashBtn.addEventListener('click', () => {
-                const val = parseFloat(dom.microSavingsInput.value) || 0;
-                if (val <= 0) return;
-
-                const currentCash = parseFloat(dom.cashValue.value) || 0;
-                dom.cashValue.value = (currentCash + val).toFixed(2);
-                dom.microSavingsInput.value = '';
-
-                recalculateAll();
-            });
-
-            // Add Contribution Button
-            dom.addContribBtn.addEventListener('click', () => {
-                const amt = parseFloat(dom.contribAmount.value) || 0;
-                const dt = dom.contribDate.value;
-                if (amt <= 0 || !dt) {
-                    alert("Please provide a valid contribution amount and scheduled date.");
-                    return;
-                }
-                savedContributions.push({ amount: amt, date: dt });
-                dom.contribAmount.value = '';
-                renderContributions();
-                recalculateAll();
-            });
-
-            // Default contribution date to next month
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            dom.contribDate.value = nextMonth.toISOString().split('T')[0];
-        }
-
-        // --- INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
-            loadSavedState();
-            renderContributions();
-            attachListeners();
-            recalculateAll();
+      }
+
+      return { months: maxMonths };
+    }
+
+    function formatDetailedTime(monthsFloat) {
+      if (monthsFloat <= 0) return '0 days';
+      const daysTotal = monthsFloat * (365.25 / 12);
+      
+      const years = Math.floor(daysTotal / 365.25);
+      const remDays = daysTotal % 365.25;
+      const months = Math.floor(remDays / (365.25 / 12));
+      const days = Math.floor(remDays % (365.25 / 12));
+
+      let parts = [];
+      if (years > 0) parts.push(`${years}y`);
+      if (months > 0) parts.push(`${months}m`);
+      if (days > 0 || parts.length === 0) parts.push(`${days}d`);
+
+      return parts.join(' ');
+    }
+
+    function formatMicroTime(monthsFloat) {
+      const minutesTotal = monthsFloat * (365.25 / 12) * 24 * 60;
+      
+      const hours = Math.floor(minutesTotal / 60);
+      const mins = Math.round(minutesTotal % 60);
+
+      if (hours >= 24) {
+        const days = (hours / 24).toFixed(1);
+        return `${days} days`;
+      }
+      if (hours > 0) {
+        return `${hours} hr${hours > 1 ? 's' : ''} and ${mins} min${mins !== 1 ? 's' : ''}`;
+      }
+      return `${mins} min${mins !== 1 ? 's' : ''}`;
+    }
+
+    // Attach listeners
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          compute();
+          saveState();
         });
-    </script>
+      }
+    });
+
+    loadState();
+    compute();
+  </script>
 </body>
 </html>
-```
