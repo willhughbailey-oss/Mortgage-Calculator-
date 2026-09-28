@@ -589,6 +589,7 @@
       }
     }
 
+        // Projects the exact month (with fractional days) when growing pot crosses remaining debt
     function projectPayoffTime(startBal, monthlyPmt, monthlyRate, startCash, startStocks, annualStockGrowth) {
       const monthlyStockGrowth = annualStockGrowth / 12;
       let bal = startBal;
@@ -601,29 +602,48 @@
 
       const maxMonths = 600;
       for (let m = 1; m <= maxMonths; m++) {
+        const prevBal = bal;
+        const prevPot = cash + stocks;
+
+        // Amortize loan for this month
         const interest = bal * monthlyRate;
         const principal = monthlyPmt - interest;
         bal = Math.max(0, bal - principal);
 
+        // Grow stocks for this month
         stocks = stocks * (1 + monthlyStockGrowth);
+        const currPot = cash + stocks;
 
-        if ((cash + stocks) >= bal || bal === 0) {
-          return { months: m };
+        // Crossover check
+        if (currPot >= bal || bal === 0) {
+          // Linear interpolation to find the exact day fraction inside month m
+          const gapBefore = prevBal - prevPot; // positive shortfall at start of month
+          const gapAfter = bal - currPot;       // negative (surplus) or zero at end of month
+          const totalProgress = gapBefore - gapAfter;
+
+          let frac = 1.0;
+          if (totalProgress > 0) {
+            frac = gapBefore / totalProgress;
+            frac = Math.max(0, Math.min(1, frac)); // clamp between 0 and 1
+          }
+
+          const exactMonths = (m - 1) + frac;
+          return { months: exactMonths };
         }
       }
 
       return { months: maxMonths };
     }
 
-    // Displays purely in Months and Days (e.g. "36m 12d" or "0m 4d")
+    // Displays in Months and Days with single-day resolution
     function formatMonthsAndDays(monthsFloat) {
       if (monthsFloat <= 0) return '0m 0d';
 
+      const totalDays = monthsFloat * (365.25 / 12);
       const months = Math.floor(monthsFloat);
-      const fracMonth = monthsFloat - months;
-      const days = Math.round(fracMonth * (365.25 / 12));
+      const remDays = Math.round(totalDays - (months * (365.25 / 12)));
 
-      return `${months}m ${days}d`;
+      return `${months}m ${remDays}d`;
     }
 
     function formatMicroTime(monthsFloat) {
